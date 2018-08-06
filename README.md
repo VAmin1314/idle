@@ -1,5 +1,6 @@
 # idle
-挂机无止境的一个python脚本
+一个游戏（挂机无止境）的一个python脚本，提供自动秘境，一键卖物等功能
 
-## 网站：
+
+## 游戏网站：
 https://www.idleinfinity.cn
