@@ -5,7 +5,7 @@ from selenium import webdriver
 
 class Idle():
     """定义参数"""
-    def __init__(self, username = "574996079@qq.com", password = "huaidan0228"):
+    def __init__(self, username, password):
         self.bossId = None
         self.skipBoss = True # 是否跳过boss
         self.username = username # 账号
@@ -14,6 +14,8 @@ class Idle():
         self.charId = None # 当前角色id
         self.nth = None # 第几个角色
         self.checkedPublic = [] # 已经计算过的区域
+        self.times = 0 # 当前秘境次数
+        self.timesLimit = 1 # 设置打多少次
 
         self.homeUrl = "https://www.idleinfinity.cn"
         self.detailUrl = self.homeUrl + "/Character/Detail?id="
@@ -104,10 +106,16 @@ class Idle():
         self.isMystery()
 
         self.click("/html/body/div[1]/div/div[1]/div[1]/div[1]/div/a[1]")
+        self.times += 1
 
         while True:
+            if self.times > self.timesLimit :
+                print("已经打了 %s 次" % self.timesLimit)
+                return
+
             surplusMonster = int(self.driver.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[2]/p[11]/span[2]").text)
             if surplusMonster == 0:
+                self.times += 1
                 self.resetMystery()
 
             div = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[2]")
