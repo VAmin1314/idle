@@ -106,17 +106,16 @@ class Idle():
         self.isMystery()
 
         self.click("/html/body/div[1]/div/div[1]/div[1]/div[1]/div/a[1]")
-        self.times += 1
 
         while True:
-            if self.times > self.timesLimit :
-                print("已经打了 %s 次" % self.timesLimit)
-                return
-
             surplusMonster = int(self.driver.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[2]/p[11]/span[2]").text)
             if surplusMonster == 0:
                 self.times += 1
                 self.resetMystery()
+
+            if self.times >= self.timesLimit :
+                print("已经打了 %s 次" % self.timesLimit)
+                return
 
             div = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[2]")
 
@@ -156,8 +155,8 @@ class Idle():
             self.setTimeOut(count)
 
         count = (len(self.driver.find_elements_by_class_name("turn")) / 2) + 1
-        self.driver.execute_script("document.getElementsByClassName('turn')[0].style.display='block'")
-        result = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div[3]/div/div[1]/div[1]").text
+        # self.driver.execute_script("document.getElementsByClassName('turn')[0].style.display='block'")
+        result = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div[3]/div/div[1]/div[1]").get_attribute('textContent')
 
         print("怪物ID：%s, 战斗时间：%s 秒，结果：%s \n" % (monsterId, count, result))
         self.setTimeOut(count)
