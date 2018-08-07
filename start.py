@@ -27,11 +27,11 @@ while True:
 
     number = input("选择功能：")
     if "1" == number :
-        # try:
-        idle.mystery()
-        # except Exception as e:
-        #     print(e)
-        #     continue
+        try:
+            idle.mystery()
+        except Exception as e:
+            print(e)
+            continue
 
     elif "2" == number :
         idle.sell()

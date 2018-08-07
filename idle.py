@@ -16,7 +16,7 @@ class Idle():
         self.nth = None # 第几个角色
         self.checkedPublic = [] # 已经计算过的区域
         self.times = 0 # 当前秘境次数
-        self.timesLimit = 1 # 设置打多少次
+        self.timesLimit = 0 # 设置打多少次
 
         self.homeUrl = "https://www.idleinfinity.cn"
         self.detailUrl = self.homeUrl + "/Character/Detail?id="
@@ -123,8 +123,6 @@ class Idle():
 
                 self.resetMystery()
 
-
-
             div = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[2]")
 
             # 判断是否有怪
@@ -208,10 +206,17 @@ class Idle():
             element =  self.driver.find_element_by_xpath(element)
             js = "arguments[0].click()"
         else :
-            js = "const width = $(arguments[0]).width() - 1;const height = $(arguments[0]).height() - 1;const rect = arguments[0].getBoundingClientRect(); const x = Math.round(rect.left + 1 + (width * Math.random())) + $(window).scrollLeft(); const y = Math.round(rect.top + 1 + (height * Math.random())) + $(window).scrollTop(); $(arguments[0]).trigger({ type: 'click', pageX: x, pageY: y });"
+            js = '''
+                var width = $(arguments[0]).width() - 1;
+                var height = $(arguments[0]).height() - 1;
+                var rect = $(arguments[0]).offset();
+                var x = Math.round(rect.left + 1 + (width * Math.random())) + $(window).scrollLeft();
+                var y = Math.round(rect.top + 1 + (height * Math.random())) + $(window).scrollTop();
+                $(arguments[0]).trigger({ type: 'click', pageX: x, pageY: y });
+            '''
 
-        self.driver.execute_script(js, element)
         time.sleep(1)
+        self.driver.execute_script(js, element)
 
     # 出售物品
     def sell(self):
