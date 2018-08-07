@@ -2,6 +2,7 @@
 
 import time
 from selenium import webdriver
+# from selenium.webdriver.common.action_chains import ActionChains
 
 class Idle():
     """定义参数"""
@@ -19,7 +20,7 @@ class Idle():
 
         self.homeUrl = "https://www.idleinfinity.cn"
         self.detailUrl = self.homeUrl + "/Character/Detail?id="
-        self.mysteryUrl = self.homeUrl + "/Map/Detail?id="
+        self.mysteryUrl = self.homeUrl + "/Map/Dungeon?id="
 
         print("启动浏览器中...")
         self.driver = webdriver.Chrome()
@@ -36,7 +37,7 @@ class Idle():
             login = self.driver.find_element_by_class_name("btn-login")
             temp = input("手动输入验证码:")
             code.send_keys(temp)
-            self.click(login, False)
+            self.click(login)
 
             if not self.isElementExists(".img-thumbnail") :
                 self.inputAccount()
@@ -103,19 +104,26 @@ class Idle():
         print("秘境开始...")
         # 进入秘境
         self.toMystery()
-        self.isMystery()
+        # self.isMystery()
 
-        self.click("/html/body/div[1]/div/div[1]/div[1]/div[1]/div/a[1]")
+        # self.click("/html/body/div[1]/div/div[1]/div[1]/div[1]/div/a[1]")
 
         while True:
+            # if isElementExists() :
+            #     raise Exception("当前非秘境副本！！！\n")
+
             surplusMonster = int(self.driver.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[2]/p[11]/span[2]").text)
             if surplusMonster == 0:
                 self.times += 1
+
+                if self.timesLimit > 0 and self.times >= self.timesLimit :
+                    self.times = 0
+                    print("已经打了 %s 次" % self.timesLimit)
+                    return
+
                 self.resetMystery()
 
-            if self.times >= self.timesLimit :
-                print("已经打了 %s 次" % self.timesLimit)
-                return
+
 
             div = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[2]")
 
@@ -142,12 +150,12 @@ class Idle():
                     continue
 
                 if self.isCanDiv(currentId, currentClass):
-                    self.click(i, False)
+                    self.click(i)
 
     # 开始战斗
     def startPlay(self, monster):
         monsterId = monster.get_attribute("id")
-        self.click(monster, False)
+        self.click(monster)
 
         if self.isElementExists("#time") :
             count = int(self.driver.find_element_by_id("time").text)
@@ -155,7 +163,6 @@ class Idle():
             self.setTimeOut(count)
 
         count = (len(self.driver.find_elements_by_class_name("turn")) / 2) + 1
-        # self.driver.execute_script("document.getElementsByClassName('turn')[0].style.display='block'")
         result = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div[3]/div/div[1]/div[1]").get_attribute('textContent')
 
         print("怪物ID：%s, 战斗时间：%s 秒，结果：%s \n" % (monsterId, count, result))
@@ -196,13 +203,14 @@ class Idle():
         self.click("/html/body/div[1]/div/div[1]/div/div[1]/div/a[1]")
         self.click("//*[@id=\"modalConfirm\"]/div/div/div[3]/button[1]")
 
-    # type == True 传入的是一个字符串
-    # type == False 传入的是一个对象
-    def click(self, element, type = True):
-        if type:
+    def click(self, element):
+        if isinstance(element, str) :
             element =  self.driver.find_element_by_xpath(element)
+            js = "arguments[0].click()"
+        else :
+            js = "const width = $(arguments[0]).width() - 1;const height = $(arguments[0]).height() - 1;const rect = arguments[0].getBoundingClientRect(); const x = Math.round(rect.left + 1 + (width * Math.random())) + $(window).scrollLeft(); const y = Math.round(rect.top + 1 + (height * Math.random())) + $(window).scrollTop(); $(arguments[0]).trigger({ type: 'click', pageX: x, pageY: y });"
 
-        self.driver.execute_script("arguments[0].click();", element)
+        self.driver.execute_script(js, element)
         time.sleep(1)
 
     # 出售物品
@@ -220,9 +228,9 @@ class Idle():
             ]
 
             temp = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div[2]/div[1]/div/div[1]/ul").find_element_by_class_name(types[goodsType])
-            self.click(temp, False)
+            self.click(temp)
             temp = self.driver.find_element_by_class_name("equip-sellbagallpage")
-            self.click(temp, False)
+            self.click(temp)
             self.click("//*[@id=\"modalConfirm\"]/div/div/div[3]/button[1]")
             print("选中物品已经出售完成...\n")
             print("返回菜单...\n")
