@@ -54,6 +54,8 @@ class Idle():
     def inputAccount(self):
         username = self.driver.find_element_by_id("username")
         password = self.driver.find_element_by_id("password")
+        username.send_keys('')
+        password.send_keys('')
         username.send_keys(self.username)
         password.send_keys(self.password)
 
@@ -123,10 +125,10 @@ class Idle():
 
                 self.resetMystery()
 
-            div = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[2]")
+            container = self.driver.find_element_by_class_name("dungeon-container")
 
             # 判断是否有怪
-            monster = div.find_elements_by_class_name("monster")
+            monster = container.find_elements_by_class_name("monster")
             # if self.skipBoss :
             #     for i in monster:
             #         if "boss" in i.get_attribute("class"):
@@ -138,7 +140,7 @@ class Idle():
                 continue
 
             # 判断空格
-            public = div.find_elements_by_class_name("public")
+            public = container.find_elements_by_class_name("public")
             print("迷雾区域判断，稍后自动开始模拟点击...")
             for i in public :
                 currentId = int(i.get_attribute("id"))
@@ -147,13 +149,14 @@ class Idle():
                 if (currentId in self.checkedPublic) or ("monster" in currentClass) :
                     continue
 
-                if self.isCanDiv(currentId, currentClass):
-                    self.click(i)
+                if self.isCanDiv(currentId, currentClass) :
+                    print(currentId)
+                    self.click(i, True)
 
     # 开始战斗
     def startPlay(self, monster):
         monsterId = monster.get_attribute("id")
-        self.click(monster)
+        self.click(monster, True)
 
         if self.isElementExists("#time") :
             count = int(self.driver.find_element_by_id("time").text)
@@ -161,7 +164,7 @@ class Idle():
             self.setTimeOut(count)
 
         count = (len(self.driver.find_elements_by_class_name("turn")) / 2) + 1
-        result = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div[3]/div/div[1]/div[1]").get_attribute('textContent')
+        result = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div[3]/div/div[1]/div").get_attribute('textContent')
 
         print("怪物ID：%s, 战斗时间：%s 秒，结果：%s \n" % (monsterId, count, result))
         self.setTimeOut(count)
@@ -201,21 +204,25 @@ class Idle():
         self.click("/html/body/div[1]/div/div[1]/div/div[1]/div/a[1]")
         self.click("//*[@id=\"modalConfirm\"]/div/div/div[3]/button[1]")
 
-    def click(self, element):
+    def click(self, element, isMonster = False):
+        js = "arguments[0].click()"
+
         if isinstance(element, str) :
             element =  self.driver.find_element_by_xpath(element)
-            js = "arguments[0].click()"
-        else :
+
+        if isMonster :
+            # js = '$(arguments[0]).mousedown()'
             js = '''
                 var width = $(arguments[0]).width() - 1;
                 var height = $(arguments[0]).height() - 1;
                 var rect = $(arguments[0]).offset();
                 var x = Math.round(rect.left + 1 + (width * Math.random())) + $(window).scrollLeft();
                 var y = Math.round(rect.top + 1 + (height * Math.random())) + $(window).scrollTop();
-                $(arguments[0]).trigger({ type: 'click', pageX: x, pageY: y });
+                $(arguments[0]).trigger({ type: 'mousedown', pageX: x, pageY: y });
             '''
-
+        # % ('mousedown' if isMonster else 'click')
         time.sleep(1)
+        print(js)
         self.driver.execute_script(js, element)
 
     # 出售物品
