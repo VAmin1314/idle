@@ -205,25 +205,33 @@ class Idle():
         self.click("//*[@id=\"modalConfirm\"]/div/div/div[3]/button[1]")
 
     def click(self, element, isMonster = False):
-        js = "arguments[0].click()"
+        if self.isElementExists(".footer"):
+            temp = self.driver.find_element_by_class_name("footer")
+            js = "$(arguments[0]).remove()"
+            self.driver.execute_script(js, temp)
+
+        time.sleep(1)
 
         if isinstance(element, str) :
             element =  self.driver.find_element_by_xpath(element)
 
-        if isMonster :
-            # js = '$(arguments[0]).mousedown()'
-            js = '''
-                var width = $(arguments[0]).width() - 1;
-                var height = $(arguments[0]).height() - 1;
-                var rect = $(arguments[0]).offset();
-                var x = Math.round(rect.left + 1 + (width * Math.random())) + $(window).scrollLeft();
-                var y = Math.round(rect.top + 1 + (height * Math.random())) + $(window).scrollTop();
-                $(arguments[0]).trigger({ type: 'mousedown', pageX: x, pageY: y });
-            '''
-        # % ('mousedown' if isMonster else 'click')
-        time.sleep(1)
-        print(js)
+        js = "arguments[0].scrollIntoView(false);"
         self.driver.execute_script(js, element)
+
+        element.click()
+
+        # js = "arguments[0].click()"
+        # if isMonster :
+        #     # js = '$(arguments[0]).mousedown()'
+        #     js = '''
+        #         var width = $(arguments[0]).width() - 1;
+        #         var height = $(arguments[0]).height() - 1;
+        #         var rect = $(arguments[0]).offset();
+        #         var x = Math.round(rect.left + 1 + (width * Math.random())) + $(window).scrollLeft();
+        #         var y = Math.round(rect.top + 1 + (height * Math.random())) + $(window).scrollTop();
+        #         $(arguments[0]).trigger({ type: 'mousedown', pageX: x, pageY: y });
+        #     '''
+        # # % ('mousedown' if isMonster else 'click')
 
     # 出售物品
     def sell(self):
@@ -239,8 +247,10 @@ class Idle():
                 "physical", "base", "magical", "rare", "set", "unique", "artifact"
             ]
 
+            self.click("/html/body/div[1]/div/div/div[2]/div[1]/div/div[1]/button")
             temp = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div[2]/div[1]/div/div[1]/ul").find_element_by_class_name(types[goodsType])
             self.click(temp)
+
             temp = self.driver.find_element_by_class_name("equip-sellbagallpage")
             self.click(temp)
             self.click("//*[@id=\"modalConfirm\"]/div/div/div[3]/button[1]")
