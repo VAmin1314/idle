@@ -10,10 +10,8 @@
 
 from idle import Idle
 
-name = "1361082133@qq.com"
-pwd = "a123456"
-name = "574996079@qq.com"
-pwd = "huaidan0228"
+name = ""
+pwd = ""
 idle = Idle(name, pwd)
 idle.start()
 idle.character()
